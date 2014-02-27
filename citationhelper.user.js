@@ -53,5 +53,9 @@ CitationButton={
     }catch(e){console.log(e)}
     })
   }
-
+ // TODO: Keyboard shortcuts
 }
+
+//TODO: CitationSearch.searchDialog(selectedText)
+
+//TODO: InsertCitation.updateEditor
