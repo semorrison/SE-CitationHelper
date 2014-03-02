@@ -54,7 +54,7 @@ CitationButton={
     CitationButton.addGenericButton('C',CitationButton.searchCallback,'cite','','hey',false)
   },
   searchCallback: function(tid){
-    var selectedText="" // TODO : Fill this in
+    var selectedText="" // TODO : Fill this in with something that extracts the actual selected text. 
     CitationSearch.searchDialog(tid, selectedText)
   }
  // TODO: Keyboard shortcuts
@@ -64,28 +64,31 @@ CitationButton={
 
 CitationSearch = {
   searchDialog: function(id){
+    // Tweaked version of SE close popup code
     var blob=new Blob(['<div id="popup-close-question" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"> <div id=citation></div><!-- Copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html --> <script> </script> <iframe width=640 height=480 src=\'http://semorrison.github.io/citation-search/?q=blandford%20znajek\'/> <script> var query = encodeURIComponent("index for subfactors"); query="blandford" //$(\'iframe\').attr(\'src\', \'https://semorrison.github.io/citation-search/index.html?q=\' + query ); </script></div></div>']);
     $.ajaxSetup({cache:true});
     $('#hello').loadPopup({url:URL.createObjectURL(blob),loaded:CitationSearch.callback});
     $.ajaxSetup({cache:false});
   },
   callback:function(){
+    // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
     function listenMessage(msg) {
 			StackExchange.helpers.closePopups();
       var json = JSON.parse(msg.data);
-     // Copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
       var cite = $('<cite>').attr('authors', json.authors)
 								  .attr('MRNumber', json.MRNumber)
 								  .attr('cite', json.cite)
 								  .append($('<a>')
 								  	.attr('href', json.url)
 								  	.append(json.title));
+      // TODO: Move this over to InsertCitation
 			$('#wmd-input').val($('<span></span>').append(cite).html());
       StackExchange.MarkdownEditor.refreshAllPreviews()
 		}
 
 		if (window.addEventListener) {
 		    window.addEventListener("message", listenMessage, false);
+        // TODO: Have the listener clean itself up, or have a persistent one that isn't added multiple times and knows the current textarea id / etc
 		} else {
 		    window.attachEvent("onmessage", listenMessage);
 		}
