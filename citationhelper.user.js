@@ -25,7 +25,7 @@ with_jquery(function($){
 // Most code for CitationButton taken from https://github.com/Manishearth/Manish-Codes/blob/master/StackExchange/MathJaxButtonsScript.js
 
 CitationButton={
-  addButton: function(text,callback,identify,pic,tooltip,force){
+  addGenericButton: function(text,callback,identify,pic,tooltip,force){
     //Callback must take id of textarea as argument.
     force = typeof force !== 'undefined' ? force : false;
     var tas=force?$('.wmd-container'):$('.wmd-container').not(".canhasbutton"+identify);
@@ -43,7 +43,7 @@ CitationButton={
       if(lastel.length>0){
         px=parseInt(lastel[0].style.left.replace("px",""))+25;
         //add code for background-position of span as well later
-        btn='<li class="wmd-button" style="left: '+px+'px; "><span style="background-image:url('+pic+');text-align:center;">'+text+'</span></li>';
+        btn='<li class="wmd-button" style="left: '+px+'px; "><span id=hello style="background-image:url('+pic+');text-align:center;">'+text+'</span></li>';
         $(btn).on("click",function(){callback(tid)}).attr("title",tooltip).insertAfter(lastel);
         btn=$(row).find(".wmd-button").not(".wmd-help-button").filter(":last");
         if(pic==""){
@@ -52,10 +52,43 @@ CitationButton={
       }
     }catch(e){console.log(e)}
     })
+  },
+  addButton: function(id){
+    CitationButton.addGenericButton('C',function(){CitationSearch.searchDialog(id,"")},'cite','','hey',false)
   }
  // TODO: Keyboard shortcuts
 }
 
 //TODO: CitationSearch.searchDialog(selectedText)
 
+CitationSearch = {
+  searchDialog: function(id,selectedText){
+    var blob=new Blob(['<div id="popup-close-question" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"> <div id=citation></div><!-- Copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html --> <script> </script> <iframe width=640 height=480 src=\'http://semorrison.github.io/citation-search/?q=blandford%20znajek\'/> <script> var query = encodeURIComponent("index for subfactors"); query="blandford" //$(\'iframe\').attr(\'src\', \'https://semorrison.github.io/citation-search/index.html?q=\' + query ); </script></div></div>']);
+    $.ajaxSetup({cache:true});
+    $('#hello').loadPopup({url:URL.createObjectURL(blob),loaded:CitationSearch.callback});
+    $.ajaxSetup({cache:false});
+  },
+  callback:function(){
+    function listenMessage(msg) {
+			StackExchange.helpers.closePopups();
+      var json = JSON.parse(msg.data);
+     // Copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
+      var cite = $('<cite>').attr('authors', json.authors)
+								  .attr('MRNumber', json.MRNumber)
+								  .attr('cite', json.cite)
+								  .append($('<a>')
+								  	.attr('href', json.url)
+								  	.append(json.title));
+			$('#wmd-input').val($('<span></span>').append(cite).html());
+      StackExchange.MarkdownEditor.refreshAllPreviews()
+		}
+
+		if (window.addEventListener) {
+		    window.addEventListener("message", listenMessage, false);
+		} else {
+		    window.attachEvent("onmessage", listenMessage);
+		}
+  }
+}
 //TODO: InsertCitation.updateEditor
+CitationButton.addButton('wmd-input')
