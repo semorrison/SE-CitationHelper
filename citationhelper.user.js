@@ -17,10 +17,7 @@ function with_jquery(f) {
      document.body.appendChild(script);
 };
 
-with_jquery(function($){
-//Inject code here
 
-});
 
 // Most code for CitationButton taken from https://github.com/Manishearth/Manish-Codes/blob/master/StackExchange/MathJaxButtonsScript.js
 
@@ -53,8 +50,12 @@ CitationButton={
     }catch(e){console.log(e)}
     })
   },
-  addButton: function(id){
-    CitationButton.addGenericButton('C',function(){CitationSearch.searchDialog(id,"")},'cite','','hey',false)
+  addButton: function(){
+    CitationButton.addGenericButton('C',CitationButton.searchCallback,'cite','','hey',false)
+  },
+  searchCallback: function(tid){
+    var selectedText="" // TODO : Fill this in
+    CitationSearch.searchDialog(tid, selectedText)
   }
  // TODO: Keyboard shortcuts
 }
@@ -62,7 +63,7 @@ CitationButton={
 //TODO: CitationSearch.searchDialog(selectedText)
 
 CitationSearch = {
-  searchDialog: function(id,selectedText){
+  searchDialog: function(id){
     var blob=new Blob(['<div id="popup-close-question" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"> <div id=citation></div><!-- Copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html --> <script> </script> <iframe width=640 height=480 src=\'http://semorrison.github.io/citation-search/?q=blandford%20znajek\'/> <script> var query = encodeURIComponent("index for subfactors"); query="blandford" //$(\'iframe\').attr(\'src\', \'https://semorrison.github.io/citation-search/index.html?q=\' + query ); </script></div></div>']);
     $.ajaxSetup({cache:true});
     $('#hello').loadPopup({url:URL.createObjectURL(blob),loaded:CitationSearch.callback});
@@ -90,5 +91,12 @@ CitationSearch = {
 		}
   }
 }
+
 //TODO: InsertCitation.updateEditor
+
+
+with_jquery(function($){
+//Inject code here
+
 CitationButton.addButton('wmd-input')
+});
