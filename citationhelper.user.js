@@ -5,6 +5,7 @@
 // @description Adds a cite button to the toolbar that allows for easy insertions of citations
 // @license CC-BY-SA
 // @include http://mathoverflow.net/*
+// @include http://physics.stackexchange.com/*
 // @exclude http://chat.stackexchange.com/*
 // ==/UserScript==
 
@@ -19,7 +20,8 @@ function with_jquery(f) {
 
 // TODO: Make (almost) everything a private method
 
-CitationButton={
+function injected($){
+window.CitationButton={
   addGenericButton: function(text,callback,identify,pic,tooltip){
     // Adds a generic button to all available toolbars
     // Callback must take id of textarea as argument.
@@ -79,7 +81,7 @@ CitationButton={
 }
 
 
-CitationSearch = {
+window.CitationSearch = {
   searchDialog: function(id,selectedText){
     if($('.popup-cite').length<0){return;}
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
@@ -113,7 +115,7 @@ CitationSearch = {
 
 //TODO: InsertCitation.updateEditor
 
-InsertCitation = {
+window.InsertCitation = {
   updateEditor: function(msg, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
     var json = JSON.parse(msg.data);
@@ -129,6 +131,8 @@ InsertCitation = {
   }
 }
 
-with_jquery(function($){
-  CitationButton.addButton('wmd-input')
-});
+CitationButton.addButton('wmd-input');
+
+}; // end injected()
+
+with_jquery(injected);
