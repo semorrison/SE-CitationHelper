@@ -57,7 +57,7 @@ window.CitationButton={
   },
   creationCallback: function(obj,prefix){
 	setTimeout(function(){
-  	CitationButton.addGenericButton('C',CitationButton.searchCallback,'cite','','Insert Citation')
+  	CitationButton.addGenericButton('<span style="font-size:9px">\\cite</span>',CitationButton.searchCallback,'cite','','Insert Citation')
         },0)
   },
   searchCallback: function(tid){
