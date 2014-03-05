@@ -26,19 +26,16 @@ CitationButton={
     //Callback must take id of textarea as argument.
     $('.wmd-container').not(".hasbutton-"+identify).each(function(){
     try{
-      var tid=$(this).find("[id^=wmd-input]")[0].id;
-      row=$(this).find("[id^=wmd-button-row]")[0];
+      var tid=$(this).find(".wmd-input")[0].id;
+      row=$(this).find(".wmd-button-row")[0];
       lastel=$(row).find(".wmd-button").not(".wmd-help-button").filter(":last");
       if(lastel.length>0){
         px=parseInt(lastel[0].style.left.replace("px",""))+25;
-        //add code for background-position of span as well later
         btn='<li class="wmd-button wmd-button-'+identify+'" style="left: '+px+'px; "><span class=citebuttonspan style="background-image:url('+pic+');text-align:center;">'+text+'</span></li>';
-        $(btn).attr("title",tooltip).insertAfter(lastel).on("click",function(e){if(e.target.tagName.toLowerCase() == "li" || e.target.tagName.toLowerCase() == "span"){callback(tid);}});
+        $(btn).attr("title",tooltip).insertAfter(lastel)
+	      .on("click",function(e){if(e.target.tagName.toLowerCase() == "li" || e.target.tagName.toLowerCase() == "span"){callback(tid);}})
+	      .children('span').hover(function(){$(this).css('background','#DEEDFF')},function(){$(this).css('background','none')});
 	$(this).addClass(" hasbutton-"+identify);
-	btn=$(row).find(".wmd-button").not(".wmd-help-button").filter(":last");
-        if(pic==""){
-          $(btn).children('span').hover(function(){$(this).css('background','#DEEDFF')},function(){$(this).css('background','none')});
-        }
       }
     }catch(e){console.log(e)}
     })
