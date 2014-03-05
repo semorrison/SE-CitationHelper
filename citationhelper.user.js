@@ -40,7 +40,7 @@ window.CitationButton={
     }catch(e){console.log(e)}
     })
   },
-  addButton: function(){
+  addButtons: function(){
     // Add a hook for whenever new editors are created
     StackExchange.MarkdownEditor.creationCallbacks.add(CitationButton.creationCallback)
     // Add the button to editors which already exist
@@ -130,8 +130,10 @@ window.InsertCitation = {
   }
 }
 
-CitationButton.addButton('wmd-input');
-
+StackExchange.using("editor",function(){
+CitationButton.addButtons();
+},true);
 }; // end injected()
+
 
 with_jquery(injected);
