@@ -6,7 +6,6 @@
 // @license CC-BY-SA
 // @include http://mathoverflow.net/*
 // @include http://physics.stackexchange.com/*
-// @exclude http://chat.stackexchange.com/*
 // ==/UserScript==
 
 
