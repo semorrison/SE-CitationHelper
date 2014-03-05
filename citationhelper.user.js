@@ -54,8 +54,17 @@ CitationButton={
     CitationButton.addGenericButton('C',CitationButton.searchCallback,'cite','','hey',false)
   },
   searchCallback: function(tid){
-    var selectedText="" // TODO : Fill this in with something that extracts the actual selected text. 
+    var selectedText=CitationButton.getSelection(tid);
     CitationSearch.searchDialog(tid, selectedText)
+  },
+  getSelection: function(tid){
+    try{
+      ta=$('#'+tid)[0];
+      console.log(ta.value,ta.selectionStart,ta.selectionEnd)
+      return ta.value.slice(ta.selectionStart,ta.selectionEnd)    
+    }catch(e){
+      return "";
+    }
   }
  // TODO: Keyboard shortcuts
 }
@@ -63,9 +72,11 @@ CitationButton={
 //TODO: CitationSearch.searchDialog(selectedText)
 
 CitationSearch = {
-  searchDialog: function(id){
+  searchDialog: function(id,selectedText){
     // Tweaked version of SE close popup code
-    var blob=new Blob(['<div id="popup-close-question" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"> <div id=citation></div><!-- Copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html --> <script> </script> <iframe width=640 height=480 src=\'http://semorrison.github.io/citation-search/?q=blandford%20znajek\'/> <script> var query = encodeURIComponent("index for subfactors"); query="blandford" //$(\'iframe\').attr(\'src\', \'https://semorrison.github.io/citation-search/index.html?q=\' + query ); </script></div></div>']);
+    var popupHTML = '<div id="popup-close-question" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"><iframe width=640 height=480 src=\'http://semorrison.github.io/citation-search/?q=$question\'/></div></div>';
+    popupHTML=popupHTML.replace("$question",encodeURIComponent(selectedText));
+    var blob=new Blob([popupHTML]);
     $.ajaxSetup({cache:true});
     $('#hello').loadPopup({url:URL.createObjectURL(blob),loaded:CitationSearch.callback});
     $.ajaxSetup({cache:false});
