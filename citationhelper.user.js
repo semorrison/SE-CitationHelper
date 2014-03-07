@@ -83,9 +83,12 @@ window.CitationButton={
 window.CitationSearch = {
   searchDialog: function(id,selectedText){
     if($('.popup-cite').length<0){return;}
+    
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
     var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"><iframe width=640 height=480 src=\'http://$username.github.io/citation-search/?q=$question\'/></div></div>';
     popupHTML=popupHTML.replace("$question",encodeURIComponent(selectedText)).replace("$username","manishearth");
+    
+    /*
     // Data URIs give CORS issues, but blobs are fine
     var blob=new Blob([popupHTML]);
     // jQuery AJAX cache prevention (the addition of an _ param to the query string) breaks blob URLs.
@@ -95,6 +98,8 @@ window.CitationSearch = {
 	     .loadPopup({url:URL.createObjectURL(blob),loaded:CitationSearch.callback})
     // Put things back where they were
     $.ajaxSetup({cache:false});
+    */
+    CitationSearch.loadPopup(popupHTML);
   },
   callback:function(){
     // Stuff to run once the popup loads. Add post-popup customization here
@@ -109,10 +114,16 @@ window.CitationSearch = {
       StackExchange.MarkdownEditor.refreshAllPreviews();
       StackExchange.helpers.closePopups();
   },
-  currentId: ""
+  currentId: "",
+  loadPopup: function(html){
+    // Stack Exchange's loadPopup isn't giving perfect results, let's mimic the behavior used by the image dialog
+    citeDialog = $(html);
+    citeDialog.appendTo('#header');
+    StackExchange.helpers.bindMovablePopups();
+    $('.popup-close').click(function(){StackExchange.helpers.closePopups('.popup');})
+    citeDialog.center().fadeIn('fast')
+  }
 }
-
-//TODO: InsertCitation.updateEditor
 
 window.InsertCitation = {
   updateEditor: function(msg, id){
