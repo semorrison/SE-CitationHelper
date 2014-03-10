@@ -92,8 +92,8 @@ StackExchange.citations = (function(){
     if($('.popup-cite').length<0){return;}
     
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
-    var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"><iframe width=640 height=480 src=\'http://$username.github.io/citation-search/?q=$question\'/></div></div>';
-    popupHTML=popupHTML.replace("$question",encodeURIComponent(selectedText)).replace("$username","manishearth");
+    var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"><iframe width=640 height=480 src=\'http://{username}.github.io/citation-search/?q={question}\'/></div></div>';
+    popupHTML=popupHTML.formatUnicorn({"question":encodeURIComponent(selectedText),"username":"manishearth"});
     
     /*
     // Data URIs give CORS issues, but blobs are fine
