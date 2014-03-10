@@ -20,6 +20,13 @@ function with_jquery(f) {
 // TODO: Make (almost) everything a private method
 
 function injected($){
+  
+StackExchange.citations = (function(){
+  
+  return {init:init};
+  function init(){
+    
+  }
 window.CitationButton={
   addGenericButton: function(text,callback,identify,pic,tooltip){
     // Adds a generic button to all available toolbars
@@ -144,6 +151,7 @@ window.InsertCitation = {
 StackExchange.using("editor",function(){
 CitationButton.addButtons();
 },true);
+})()//end function
 }; // end injected()
 
 
