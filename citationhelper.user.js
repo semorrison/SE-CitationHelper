@@ -25,10 +25,12 @@ StackExchange.citations = (function(){
   
   return {init:init};
   function init(){
-    
+    StackExchange.using("editor",function(){
+	addButtons();
+      },true);
   }
-window.CitationButton={
-  addGenericButton: function(text,callback,identify,pic,tooltip){
+  
+  function addGenericButton(text,callback,identify,pic,tooltip){
     // Adds a generic button to all available toolbars
     // Callback must take id of textarea as argument.
     $('.wmd-container').not(".hasbutton-"+identify).each(function(){
@@ -46,49 +48,47 @@ window.CitationButton={
       }
     }catch(e){console.log(e)}
     })
-  },
-  addButtons: function(){
+  }
+  function addButtons(){
     // Add a hook for whenever new editors are created
-    StackExchange.MarkdownEditor.creationCallbacks.add(CitationButton.creationCallback)
+    StackExchange.MarkdownEditor.creationCallbacks.add(creationCallback)
     // Add the button to editors which already exist
-    CitationButton.creationCallback();
+    creationCallback();
     // Clear the cached id when popups are closed
-    $(document).on('popupClose',function(){CitationSearch.currentId="";});
+    $(document).on('popupClose',function(){currentId="";});
     // Listen for incoming messages
     if (window.addEventListener) {
-	window.addEventListener("message", CitationSearch.listenMessage, false);
+	window.addEventListener("message", listenMessage, false);
     } else {
-	window.attachEvent("onmessage", CitationSearch.listenMessage);
+	window.attachEvent("onmessage", listenMessage);
     }
-  },
-  creationCallback: function(obj,prefix){
+  }
+  function creationCallback(obj,prefix){
 	setTimeout(function(){
-  	CitationButton.addGenericButton('<span style="font-size:9px">\\cite</span>',CitationButton.searchCallback,'cite','','Insert Citation')
+  	addGenericButton('<span style="font-size:9px">\\cite</span>',searchCallback,'cite','','Insert Citation')
         },0)
-  },
-  searchCallback: function(tid){
-    var selectedText=CitationButton.getSelection(tid);
-    CitationSearch.searchDialog(tid, selectedText);
-  },
-  getSelection: function(tid){
+  }
+  function searchCallback(tid){
+    var selectedText=getSelection(tid);
+    searchDialog(tid, selectedText);
+  }
+  function getSelection(tid){
     try{
       ta=$('#'+tid)[0];
       // Cache selection values, they have a habit of clearing themselves
-      CitationButton.selStart=ta.selectionStart;
-      CitationButton.selEnd=ta.selectionEnd;
+      selStart=ta.selectionStart;
+      selEnd=ta.selectionEnd;
       return ta.value.slice(ta.selectionStart,ta.selectionEnd)    
     }catch(e){
       return "";
     }
-  },
-  selStart: 0,
-  selEnd: 0
+  }
+  var selStart= 0;
+  var selEnd= 0;
  // TODO: Keyboard shortcuts
-}
 
 
-window.CitationSearch = {
-  searchDialog: function(id,selectedText){
+  function searchDialog(id,selectedText){
     if($('.popup-cite').length<0){return;}
     
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
@@ -106,23 +106,19 @@ window.CitationSearch = {
     // Put things back where they were
     $.ajaxSetup({cache:false});
     */
-    CitationSearch.loadPopup(popupHTML);
-  },
-  callback:function(){
-    // Stuff to run once the popup loads. Add post-popup customization here
-    StackExchange.helpers.bindMovablePopups(); // Not totally necessary. Also doesn't work perfectly
-  },
-  listenMessage: function(msg) {
+    loadPopup(popupHTML);
+  }
+  function listenMessage(msg) {
       // The event handler for the message
       if(StackExchange.currentId ==""){
       	return;
       }
-      InsertCitation.updateEditor(msg,CitationSearch.currentId);
+      updateEditor(msg,currentId);
       StackExchange.MarkdownEditor.refreshAllPreviews();
       StackExchange.helpers.closePopups();
-  },
-  currentId: "",
-  loadPopup: function(html){
+  }
+  var currentId =  ""
+  function loadPopup(html){
     // Stack Exchange's loadPopup isn't giving perfect results, let's mimic the behavior used by the image dialog
     citeDialog = $(html);
     citeDialog.appendTo('#header');
@@ -130,10 +126,10 @@ window.CitationSearch = {
     $('.popup-close').click(function(){StackExchange.helpers.closePopups('.popup');})
     citeDialog.center().fadeIn('fast')
   }
-}
 
-window.InsertCitation = {
-  updateEditor: function(msg, id){
+
+
+  function updateEditor(msg, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
     var json = JSON.parse(msg.data);
     var cite = $('<cite>').attr('authors', json.authors)
@@ -144,13 +140,9 @@ window.InsertCitation = {
 			  .append(json.title));
     var citeHTML=$('<span></span>').append(cite).html();
     var val=document.getElementById(id).value;
-    document.getElementById(id).value = val.slice(0,CitationButton.selStart) + citeHTML + val.slice(CitationButton.selEnd);
+    document.getElementById(id).value = val.slice(0,selStart) + citeHTML + val.slice(selEnd);
   }
-}
 
-StackExchange.using("editor",function(){
-CitationButton.addButtons();
-},true);
 })()//end function
 }; // end injected()
 
