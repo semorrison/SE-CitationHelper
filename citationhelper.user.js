@@ -21,17 +21,18 @@ function with_jquery(f) {
 
 function injected($){
   
-StackExchange.citations = (function(){
+StackExchange.citationhelper = (function(){
+
+  return {init:init}; // Hoisting!
   
-  return {init:init};
   function init(){
     StackExchange.using("editor",function(){
 	addButtons();
       },true);
   }
-  
+
+  // Adds a generic button to all available toolbars  
   function addGenericButton(text,callback,identify,pic,tooltip){
-    // Adds a generic button to all available toolbars
     // Callback must take id of textarea as argument.
     $('.wmd-container').not(".hasbutton-"+identify).each(function(){
     try{
@@ -49,6 +50,8 @@ StackExchange.citations = (function(){
     }catch(e){console.log(e)}
     })
   }
+  
+  // Add the buttons to all available wmd windows, and also to those which are created in the future
   function addButtons(){
     // Add a hook for whenever new editors are created
     StackExchange.MarkdownEditor.creationCallbacks.add(creationCallback)
@@ -63,17 +66,21 @@ StackExchange.citations = (function(){
 	window.attachEvent("onmessage", listenMessage);
     }
   }
+  
+  // Called when the markdown editor loads
   function creationCallback(obj,prefix){
 	setTimeout(function(){
   	addGenericButton('<span style="font-size:9px">\\cite</span>',searchCallback,'cite','','Insert Citation')
         },0)
   }
+  // Called when the button is pressed
   function searchCallback(tid){
     var selectedText=getSelection(tid);
     searchDialog(tid, selectedText);
   }
+  // Extract and cache the selection from the textarea
   function getSelection(tid){
-    try{
+    try { // We're not sure if there is a selection
       ta=$('#'+tid)[0];
       // Cache selection values, they have a habit of clearing themselves
       selStart=ta.selectionStart;
@@ -83,13 +90,15 @@ StackExchange.citations = (function(){
       return "";
     }
   }
-  var selStart= 0;
-  var selEnd= 0;
- // TODO: Keyboard shortcuts
-
-
+  // Cached selection values
+  var selStart = 0;
+  var selEnd = 0;
+  // TODO: Keyboard shortcuts
+  
+  // Prepare the search dialog
   function searchDialog(id,selectedText){
-    if($('.popup-cite').length<0){return;}
+    
+    if($('.popup-cite').length>0){return;} // Abort if dialog already exists
     
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
     var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"><iframe width=640 height=480 src=\'http://{username}.github.io/citation-search/?q={question}\'/></div></div>';
@@ -108,8 +117,8 @@ StackExchange.citations = (function(){
     */
     loadPopup(popupHTML);
   }
+  // The event handler for the message
   function listenMessage(msg) {
-      // The event handler for the message
       if(StackExchange.currentId ==""){
       	return;
       }
@@ -117,7 +126,9 @@ StackExchange.citations = (function(){
       StackExchange.MarkdownEditor.refreshAllPreviews();
       StackExchange.helpers.closePopups();
   }
-  var currentId =  ""
+  var currentId =  "" // Cached textarea id
+  
+  // Load the popup and bind events
   function loadPopup(html){
     // Stack Exchange's loadPopup isn't giving perfect results, let's mimic the behavior used by the image dialog
     citeDialog = $(html);
@@ -126,9 +137,8 @@ StackExchange.citations = (function(){
     $('.popup-close').click(function(){StackExchange.helpers.closePopups('.popup');})
     citeDialog.center().fadeIn('fast')
   }
-
-
-
+  
+  // Build <cite> tags from the JSON and insert it in the right place on the page
   function updateEditor(msg, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
     var json = JSON.parse(msg.data);
@@ -143,7 +153,9 @@ StackExchange.citations = (function(){
     document.getElementById(id).value = val.slice(0,selStart) + citeHTML + val.slice(selEnd);
   }
 
-})()//end function
+})()//end function call
+
+StackExchange.citationhelper.init();
 }; // end injected()
 
 
