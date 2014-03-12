@@ -101,9 +101,8 @@ StackExchange.citationhelper = (function(){
     if($('.popup-cite').length>0){return;} // Abort if dialog already exists
     
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
-    var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane" data-title="Insert Citation" data-breadcrumb="Cite"><iframe width=640 height=480 src=\'http://{username}.github.io/citation-search/?q={question}\'/></div></div>';
-    popupHTML=popupHTML.formatUnicorn({"question":encodeURIComponent(selectedText),"username":"manishearth"});
-    
+var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane close-as-duplicate-pane" data-title="Insert Citation" data-breadcrumb="Cite"><input id="search-text" type="text" style="width: 740px; z-index: 1; position: relative;"><div class="search-errors search-spinner"></div> <div class="original-display" style="width:712px"> <div class="preview" style="display:none"></div> <div class="list-container"> <div class="list-originals" id="results"> </div> </div> </div></div></div>'; 
+ 
     /*
     // Data URIs give CORS issues, but blobs are fine
     var blob=new Blob([popupHTML]);
@@ -115,7 +114,7 @@ StackExchange.citationhelper = (function(){
     // Put things back where they were
     $.ajaxSetup({cache:false});
     */
-    loadPopup(popupHTML);
+    loadPopup(popupHTML,selectedText);
   }
   // The event handler for the message
   function listenMessage(msg) {
@@ -129,15 +128,67 @@ StackExchange.citationhelper = (function(){
   var currentId =  "" // Cached textarea id
   
   // Load the popup and bind events
-  function loadPopup(html){
+  function loadPopup(html,selectedText){
     // Stack Exchange's loadPopup isn't giving perfect results, let's mimic the behavior used by the image dialog
     citeDialog = $(html);
     citeDialog.appendTo('#header');
     StackExchange.helpers.bindMovablePopups();
     $('.popup-close').click(function(){StackExchange.helpers.closePopups('.popup');})
     citeDialog.center().fadeIn('fast')
+    $('#search-text').on('blur',runSearch).on('keyup',runSearch).val(selectedText); //TODO: only on enter key
+
+    if(selectedText){
+
+      runSearch();
+    }
   }
-  
+
+  function runSearch(){
+    $('#popup-cite .search-spinner').removeSpinner().addSpinner();
+    $.getJSON("http://polar-dawn-1849.herokuapp.com/?callback=?&q=" + $('#search-text').val(), fetchCallback);
+  } 
+  function fetchCallback(response) {
+  // response = { 
+  //	 query: "jones index for subfactors",
+  //   results: [
+  //    { citation: {
+  //	    	MRNumber: 696688, title: "Index for subfactors", authors: "Jones, V. F. R.", cite: "Invent. Math. 72 (1983), no. 1, 1–25", url: "http://dx.doi.org/10.1007/BF01389127"
+  //      },
+  //      score: 1.0 } 
+  //   ]
+  // }
+	  if($('#search-text').val() == response.query) {
+		  var html = $('<div class="list">');
+		  for (var i = 0; i < response.results.length; i++) {
+		  var result = response.results[i].citation;
+			  var mr = 'http://www.ams.org/mathscinet-getitem?mr=' + result.MRNumber;
+			  var journal = (result.url == mr) ? "" : result.url;
+			  html.append(
+				  $('<div class="item">')
+					  .append($('<div class = "summary"></div>').append(result.title))
+					  .append('<br/>').append($('<span class="body-summary"></span>')
+						  .append(result.authors + '<br/>' + result.cite  + '<br/>')
+						  .append(renderOptionalLink(mr, 'mathscinet'))
+						  .append(renderOptionalLink(journal, 'journal'))
+						  .append(renderOptionalLink(result.pdf, 'pdf'))
+						  .append(renderOptionalLink(result.free, 'free'))
+					  )
+					  .click((function(currentResult) { return function() { selectResult(currentResult); } })(result))
+			  );
+		  }
+		  
+		  $("#results").append(html);
+		  MathJax.Hub.Queue(["Typeset",MathJax.Hub,"results"]);
+		  $('#popup-cite .search-spinner').removeSpinner();
+	  }	
+  }
+function renderOptionalLink(href, text) {
+	if(href) {
+		return $('<span><a href="#">' + text + '</a> </span>').click(function() { loadInFrame(href); });
+	} else {
+		return '<span class="inactive">' + text + '</span> ';
+	}
+}
   // Build <cite> tags from the JSON and insert it in the right place on the page
   function updateEditor(msg, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
