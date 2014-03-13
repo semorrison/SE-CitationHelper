@@ -75,6 +75,7 @@ StackExchange.citationhelper = (function(){
   }
   // Called when the button is pressed
   function searchCallback(tid){
+    currentId=tid;
     var selectedText=getSelection(tid);
     searchDialog(tid, selectedText);
   }
@@ -101,7 +102,7 @@ StackExchange.citationhelper = (function(){
     if($('.popup-cite').length>0){return;} // Abort if dialog already exists
     
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
-var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane close-as-duplicate-pane" data-title="Insert Citation" data-breadcrumb="Cite"><input id="search-text" type="text" style="width: 740px; z-index: 1; position: relative;"><div class="search-errors search-spinner"></div> <div class="original-display" style="width:712px"> <div class="preview" style="display:none"></div> <div class="list-container"> <div class="list-originals" id="results"> </div> </div> </div></div></div>'; 
+    var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane close-as-duplicate-pane" data-title="Insert Citation" data-breadcrumb="Cite"><input id="search-text" type="text" style="width: 740px; z-index: 1; position: relative;"><div class="search-errors search-spinner"></div> <div class="original-display" style="width:712px"> <div class="preview" style="display:none"></div> <div class="list-container"> <div class="list-originals" id="results"> </div> </div> </div></div><div class="popup-actions"><input type="submit" class="popup-submit disabled-button" value="Insert Citation" disabled="disabled" style="cursor: default;"></div></div>';
  
     /*
     // Data URIs give CORS issues, but blobs are fine
@@ -126,7 +127,7 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
       StackExchange.helpers.closePopups();
   }
   var currentId =  "" // Cached textarea id
-  
+  var currentResult=false;
   // Load the popup and bind events
   function loadPopup(html,selectedText){
     // Stack Exchange's loadPopup isn't giving perfect results, let's mimic the behavior used by the image dialog
@@ -136,7 +137,8 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
     $('.popup-close').click(function(){StackExchange.helpers.closePopups('.popup');})
     citeDialog.center().fadeIn('fast')
     $('#search-text').on('blur',runSearch).on('keyup',runSearch).val(selectedText); //TODO: only on enter key
-
+    currentResult=false;
+    $('#popup-cite .popup-submit').on('click',function(){if(currentResult){listenMessage(currentResult)}})
     if(selectedText){
 
       runSearch();
@@ -164,35 +166,42 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
 			  var mr = 'http://www.ams.org/mathscinet-getitem?mr=' + result.MRNumber;
 			  var journal = (result.url == mr) ? "" : result.url;
 			  html.append(
-				  $('<div class="item">')
-					  .append($('<div class = "summary"></div>').append(result.title))
-					  .append('<br/>').append($('<span class="body-summary"></span>')
-						  .append(result.authors + '<br/>' + result.cite  + '<br/>')
-						  .append(renderOptionalLink(mr, 'mathscinet'))
-						  .append(renderOptionalLink(journal, 'journal'))
-						  .append(renderOptionalLink(result.pdf, 'pdf'))
-						  .append(renderOptionalLink(result.free, 'free'))
+				  $('<div class="item" style="float:none;padding:5px">')
+					  .append($('<div class = "summary post-link" style="float:none;width:auto"></div>').append(result.title))
+					  .append('<br/>').append($('<span class="body-summary" style="float:none"></span>')
+						  .append(result.authors + '<br/>' + result.cite  + '<br/> Preview: ')
+						  .append(renderOptionalLink(mr, 'mathscinet',result))
+						  .append(renderOptionalLink(journal, 'journal',result))
+						  .append(renderOptionalLink(result.pdf, 'pdf',result))
+						  .append(renderOptionalLink(result.free, 'free',result))
 					  )
-					  .click((function(currentResult) { return function() { selectResult(currentResult); } })(result))
+					  .click((function(currentResult) { return function() { listenMessage(currentResult); } })(result)).hover(function(){$(this).css('background-color','#e6e6e6')},function(){$(this).css('background-color','#fff')})
 			  );
 		  }
-		  
+		  $("#results").html('')
 		  $("#results").append(html);
 		  MathJax.Hub.Queue(["Typeset",MathJax.Hub,"results"]);
 		  $('#popup-cite .search-spinner').removeSpinner();
 	  }	
   }
-function renderOptionalLink(href, text) {
+function renderOptionalLink(href, text,result) {
 	if(href) {
-		return $('<span><a href="#">' + text + '</a> </span>').click(function() { loadInFrame(href); });
+		return $('<a href="'+href+'"> ' + text + '</a>').click(function(e) {e.preventDefault();e.stopPropagation();loadInFrame(href,result);return false;})
 	} else {
-		return '<span class="inactive">' + text + '</span> ';
+		return "" //return '<span class="inactive">' + text + '</span> ';
 	}
+}
+function loadInFrame(href, result){
+  $('#popup-cite .popup-submit').enable();
+  currentResult=result;
+  $('.list-container').hide()
+  $('#popup-cite .preview').show()
+  $('#popup-cite .preview').html("<iframe style='width:100%;height:100%' src='"+href+"'></iframe>")
 }
   // Build <cite> tags from the JSON and insert it in the right place on the page
   function updateEditor(msg, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
-    var json = JSON.parse(msg.data);
+    var json = msg//JSON.parse(msg.data);
     var cite = $('<cite>').attr('authors', json.authors)
 			  .attr('MRNumber', json.MRNumber)
 			  .attr('cite', json.cite)
