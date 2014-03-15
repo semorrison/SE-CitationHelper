@@ -17,7 +17,6 @@ function with_jquery(f) {
      document.body.appendChild(script);
 };
 
-// TODO: Make (almost) everything a private method
 
 function injected($){
   
@@ -70,6 +69,7 @@ StackExchange.citationhelper = (function(){
     } else {
 	window.attachEvent("onmessage", listenMessage);
     }
+    $('#content').on('keydown','textarea.wmd-input',keyHandler)
   }
   
   // Called when the markdown editor loads
@@ -98,7 +98,16 @@ StackExchange.citationhelper = (function(){
   }
 
   // TODO: Keyboard shortcuts
-  
+  function keyHandler(zEvent) {
+        if (zEvent.altKey  && ( zEvent.which == "c".charCodeAt(0)||zEvent.which == "c".toUpperCase().charCodeAt(0))) {
+            zEvent.stopPropagation();
+            zEvent.preventDefault()
+            searchCallback(this.id);
+            
+            return false;
+        }
+        return true;
+}
   // Prepare the search dialog
   function searchDialog(id,selectedText){
     
