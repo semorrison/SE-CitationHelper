@@ -22,7 +22,12 @@ function with_jquery(f) {
 function injected($){
   
 StackExchange.citationhelper = (function(){
-
+  // Cached selection values
+  var selStart = 0;
+  var selEnd = 0;
+  var currentId =  "" // Cached textarea id
+  var currentResult=false;
+  
   return {init:init}; // Hoisting!
   
   function init(){
@@ -91,9 +96,7 @@ StackExchange.citationhelper = (function(){
       return "";
     }
   }
-  // Cached selection values
-  var selStart = 0;
-  var selEnd = 0;
+
   // TODO: Keyboard shortcuts
   
   // Prepare the search dialog
@@ -102,8 +105,8 @@ StackExchange.citationhelper = (function(){
     if($('.popup-cite').length>0){return;} // Abort if dialog already exists
     
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
-    var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane close-as-duplicate-pane" data-title="Insert Citation" data-breadcrumb="Cite"><input id="search-text" type="text" style="width: 740px; z-index: 1; position: relative;"><div class="search-errors search-spinner"></div> <div class="original-display" style="width:712px"> <div class="preview" style="display:none"></div> <div class="list-container"> <div class="list-originals" id="results"> </div> </div> </div></div><div class="popup-actions"><input type="submit" class="popup-submit disabled-button" value="Insert Citation" disabled="disabled" style="cursor: default;"></div></div>';
- 
+var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane close-as-duplicate-pane" data-title="Insert Citation" data-breadcrumb="Cite"><input id="search-text" type="text" style="width: 740px; z-index: 1; position: relative;"><div class="search-errors search-spinner"></div> <div class="original-display" style="width:712px"> <div id="previewbox" style="display:none"><div><a href="javascript:void(0)" id=backlink>&lt; Back to results</a></div><div class="preview" ></div></div> <div class="list-container"> <div class="list-originals" id="results"> </div> </div> </div></div><div class="popup-actions"><input type="submit" id="cite-submit" class="popup-submit disabled-button" value="Insert Citation" disabled="disabled" style="cursor: default;"></div></div>';
+
     /*
     // Data URIs give CORS issues, but blobs are fine
     var blob=new Blob([popupHTML]);
@@ -126,8 +129,7 @@ StackExchange.citationhelper = (function(){
       StackExchange.MarkdownEditor.refreshAllPreviews();
       StackExchange.helpers.closePopups();
   }
-  var currentId =  "" // Cached textarea id
-  var currentResult=false;
+
   // Load the popup and bind events
   function loadPopup(html,selectedText){
     // Stack Exchange's loadPopup isn't giving perfect results, let's mimic the behavior used by the image dialog
@@ -137,6 +139,7 @@ StackExchange.citationhelper = (function(){
     $('.popup-close').click(function(){StackExchange.helpers.closePopups('.popup');})
     citeDialog.center().fadeIn('fast')
     $('#search-text').on('blur',runSearch).on('keyup',runSearch).val(selectedText); //TODO: only on enter key
+    $('#backlink').on('click',goBack);
     currentResult=false;
     $('#popup-cite .popup-submit').on('click',function(){if(currentResult){listenMessage(currentResult)}})
     if(selectedText){
@@ -170,12 +173,12 @@ StackExchange.citationhelper = (function(){
 					  .append($('<div class = "summary post-link" style="float:none;width:auto"></div>').append(result.title))
 					  .append('<br/>').append($('<span class="body-summary" style="float:none"></span>')
 						  .append(result.authors + '<br/>' + result.cite  + '<br/> Preview: ')
-						  .append(renderOptionalLink(mr, 'mathscinet',result))
-						  .append(renderOptionalLink(journal, 'journal',result))
-						  .append(renderOptionalLink(result.pdf, 'pdf',result))
+						  .append(renderOptionalLink(mr, 'mathscinet',result)).append(" ")
+						  .append(renderOptionalLink(journal, 'journal',result)).append(" ")
+						  .append(renderOptionalLink(result.pdf, 'pdf',result)).append(" ")
 						  .append(renderOptionalLink(result.free, 'free',result))
 					  )
-					  .click((function(currentResult) { return function() { listenMessage(currentResult); } })(result)).hover(function(){$(this).css('background-color','#e6e6e6')},function(){$(this).css('background-color','#fff')})
+					  .click((function(res){ return function() { listenMessage(res);}})(result)).hover(function(){$(this).css('background-color','#e6e6e6')},function(){$(this).css('background-color','#fff')})
 			  );
 		  }
 		  $("#results").html('')
@@ -184,20 +187,24 @@ StackExchange.citationhelper = (function(){
 		  $('#popup-cite .search-spinner').removeSpinner();
 	  }	
   }
-function renderOptionalLink(href, text,result) {
-	if(href) {
-		return $('<a href="'+href+'"> ' + text + '</a>').click(function(e) {e.preventDefault();e.stopPropagation();loadInFrame(href,result);return false;})
-	} else {
-		return "" //return '<span class="inactive">' + text + '</span> ';
-	}
-}
-function loadInFrame(href, result){
-  $('#popup-cite .popup-submit').enable();
-  currentResult=result;
-  $('.list-container').hide()
-  $('#popup-cite .preview').show()
-  $('#popup-cite .preview').html("<iframe style='width:100%;height:100%' src='"+href+"'></iframe>")
-}
+  function renderOptionalLink(href, text,result) {
+	  if(href) {
+		  return $('<a href="'+href+'">' + text + '</a>').click(function(e) {e.preventDefault();e.stopPropagation();loadInFrame(href,result);return false;})
+	  } else {
+		  return "" //return '<span class="inactive">' + text + '</span> ';
+	  }
+  }
+  function loadInFrame(href, result){
+    $('#popup-cite .popup-submit').enable();
+    currentResult=result;
+    $('.list-container').hide()
+    $('#popup-cite #previewbox').show()
+    $('#popup-cite .preview').html("<iframe style='width:100%;height:100%' src='"+href+"'></iframe>")
+  }
+  function goBack(){
+    $('.list-container').show()
+    $('#popup-cite #previewbox').hide()    
+  }
   // Build <cite> tags from the JSON and insert it in the right place on the page
   function updateEditor(msg, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
