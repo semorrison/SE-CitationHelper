@@ -150,6 +150,7 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
 
   function runSearch(){
     $('#popup-cite .search-spinner').removeSpinner().addSpinner();
+    goBack();
     $.getJSON("http://polar-dawn-1849.herokuapp.com/?callback=?&q=" + $('#search-text').val(), fetchCallback);
   } 
   function fetchCallback(response) {
