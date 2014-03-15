@@ -223,9 +223,10 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
 			  .attr('MRNumber', json.MRNumber)
 			  .attr('cite', json.cite)
 			  .append($('<a>')
-			  .attr('href', json.url)
-			  .append(json.title).append(", ")
-			  .append($('<i></i>').append(json.authors)).append(", "+json.cite));
+			  .attr('href', json.url).append(json.title))
+			  .append(", ")
+			  .append($('<i></i>').append(json.authors)).append(", "+json.cite);
+			  
     var citeHTML=$('<span></span>').append(cite).html();
     var val=document.getElementById(id).value;
     document.getElementById(id).value = val.slice(0,selStart) + citeHTML + val.slice(selEnd);
