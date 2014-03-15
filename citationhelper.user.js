@@ -75,7 +75,7 @@ StackExchange.citationhelper = (function(){
   // Called when the markdown editor loads
   function creationCallback(obj,prefix){
 	setTimeout(function(){
-  	addGenericButton('<span style="font-size:9px">\\cite</span>',searchCallback,'cite','','Insert Citation')
+  	addGenericButton('<span style="font-size:9px">\\cite</span>',searchCallback,'cite','','Insert Citation (Alt-C)')
         },0)
   }
   // Called when the button is pressed
