@@ -188,7 +188,7 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
 						  .append(renderOptionalLink(result.pdf, 'pdf',result)).append(" ")
 						  .append(renderOptionalLink(result.free, 'free',result))
 					  )
-					  .click((function(res){ return function() { listenMessage(res);}})(result)).hover(function(){$(this).css('background-color','#e6e6e6')},function(){$(this).css('background-color','#fff')})
+					  .click(loadInFrameCallback(result.best,result)).hover(function(){$(this).css('background-color','#e6e6e6')},function(){$(this).css('background-color','#fff')})
 			  );
 		  }
 		  $("#results").html('')
@@ -199,10 +199,13 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
   }
   function renderOptionalLink(href, text,result) {
 	  if(href) {
-		  return $('<a href="'+href+'">' + text + '</a>').click(function(e) {e.preventDefault();e.stopPropagation();loadInFrame(href,result);return false;})
+		  return $('<a href="'+href+'">' + text + '</a>').click(loadInFrameCallback(href,result))
 	  } else {
 		  return "" //return '<span class="inactive">' + text + '</span> ';
 	  }
+  }
+  function loadInFrameCallback(href,result){
+    return function(e) {e.preventDefault();e.stopPropagation();loadInFrame(href,result);return false;}
   }
   function loadInFrame(href, result){
     $('#popup-cite .popup-submit').enable();
@@ -214,6 +217,7 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
   function goBack(){
     $('.list-container').show()
     $('#popup-cite #previewbox').hide()    
+    $('#popup-cite .popup-submit').disable();
   }
   // Build <cite> tags from the JSON and insert it in the right place on the page
   function updateEditor(msg, id){
