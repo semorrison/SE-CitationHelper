@@ -33,6 +33,7 @@ StackExchange.citationhelper = (function(){
     StackExchange.using("editor",function(){
 	addButtons();
       },true);
+    $('body').on('click','cite',createPopup)
   }
 
   // Adds a generic button to all available toolbars  
@@ -262,7 +263,7 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
     popup.css({top:p.top+10,left:p.left+10})
     element.append(popup);
     e.stopPropagation();
-    $('body').on('click',':not(cite)',function(e){$('body').on('click',':not(cite)');$('.popup-cite-info').remove())
+    $('body').on('click',':not(cite)',function(e){$('body').on('click',':not(cite)');$('.popup-cite-info').remove()})
   }
 })()//end function call
 
