@@ -230,12 +230,40 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
 			  .attr('href', json.url).append(json.title))
 			  .append(", ")
 			  .append($('<i></i>').append(json.authors)).append(", "+json.cite);
-			  
+    addExtraData(cite,msg);
     var citeHTML=$('<span></span>').append(cite).html();
     var val=document.getElementById(id).value;
     document.getElementById(id).value = val.slice(0,selStart) + citeHTML + val.slice(selEnd);
   }
-
+  function addExtraData(element,msg){
+    var items=["url","MRNumber","pdf","free"];
+    for (i in items){
+      element.attr("data-"+items[i],msg[items[i]])
+    }
+  }
+  function createPopup(e){
+    var element=$(this);
+    if($('.popup-cite-info').length){return;}
+    if(e.target.nodeName=='A'){return;}
+    popup=$('<div class="popup-cite-info esc-remove" style="font-style:normal;border:1px solid black;background:#fff;display: block;color: #555;padding: 10px;z-index: 250;position: absolute;"></div>');
+    popup.append('<h2>'+element.attr('cite')+'</h2>').append('<h4>'+element.attr('authors')+'</h4>').append('<br>Links:')
+    table=$('<table></table>')
+    var items=["URL","PDF","Free"];
+    if(element.data('mrnumber')){
+      	table.append('<tr><td><a href="'+'http://www.ams.org/mathscinet-getitem?mr='+element.data('mrnumber')+'">MathSciNet</a></td></tr>')
+    }
+    for (i in items){
+      if(element.data(items[i].toLowerCase())){
+      	table.append('<tr><td><a href="'+element.data(items[i].toLowerCase())+'">'+items[i]+'</a>')
+      }
+    }
+    popup.append(table)
+    p=element.position()
+    popup.css({top:p.top+10,left:p.left+10})
+    element.append(popup);
+    e.stopPropagation();
+    $('body').on('click',':not(cite)',function(e){$('body').on('click',':not(cite)');$('.popup-cite-info').remove())
+  }
 })()//end function call
 
 StackExchange.citationhelper.init();
