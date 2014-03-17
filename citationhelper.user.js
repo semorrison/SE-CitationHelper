@@ -97,7 +97,7 @@ StackExchange.citationhelper = (function(){
     }
   }
 
-  // TODO: Keyboard shortcuts
+
   function keyHandler(zEvent) {
         if (zEvent.altKey  && ( zEvent.which == "c".charCodeAt(0)||zEvent.which == "c".toUpperCase().charCodeAt(0))) {
             zEvent.stopPropagation();
@@ -107,7 +107,7 @@ StackExchange.citationhelper = (function(){
             return false;
         }
         return true;
-}
+  }
   // Prepare the search dialog
   function searchDialog(id,selectedText){
     
@@ -147,7 +147,7 @@ StackExchange.citationhelper = (function(){
     StackExchange.helpers.bindMovablePopups();
     $('.popup-close').click(function(){StackExchange.helpers.closePopups('.popup');})
     citeDialog.center().fadeIn('fast')
-    $('#search-text').on('blur',runSearch).on('keyup',runSearch).val(selectedText); //TODO: only on enter key
+    $('#search-text').on('blur',runSearch).on('keypress',runSearchKey).val(selectedText).focus();
     $('#backlink').on('click',goBack);
     currentResult=false;
     $('#popup-cite .popup-submit').on('click',function(){if(currentResult){listenMessage(currentResult)}})
@@ -156,10 +156,16 @@ StackExchange.citationhelper = (function(){
       runSearch();
     }
   }
+  function runSearchKey(e){
+    var key = (e.keyCode ? e.keyCode : e.which);
+    if(key == 13) {
+      runSearch();
+    } 
+  }
   // Run a search
   function runSearch(){
-    $('#popup-cite .search-spinner').removeSpinner().addSpinner();
     goBack();
+    $('#popup-cite .search-spinner').removeSpinner().addSpinner();
     $.getJSON("http://polar-dawn-1849.herokuapp.com/?callback=?&q=" + $('#search-text').val(), fetchCallback);
   }
   
@@ -210,7 +216,7 @@ StackExchange.citationhelper = (function(){
     return function(e) {e.preventDefault();e.stopPropagation();loadInFrame(href,result);return false;}
   }
   function loadInFrame(href, result){
-    $('#popup-cite .search-spinner').addSpinner();
+    $('#popup-cite .search-spinner').removeSpinner().addSpinner();
     $('#popup-cite .popup-submit').enable();
     currentResult=result;
     $('.list-container').hide()
