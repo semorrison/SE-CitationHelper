@@ -226,10 +226,8 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
     var cite = $('<cite>').attr('authors', json.authors)
 			  .attr('MRNumber', json.MRNumber)
 			  .attr('cite', json.cite)
-			  .append($('<a>')
-			  .attr('href', json.url).append(json.title))
-			  .append(", ")
-			  .append($('<i></i>').append(json.authors)).append(", "+json.cite);
+			  .append('['+json.title+']('+encodeURI(json.url)+")")
+			  .append(", _"+json.authors+"_ , "+json.cite);
 			  
     var citeHTML=$('<span></span>').append(cite).html();
     var val=document.getElementById(id).value;
