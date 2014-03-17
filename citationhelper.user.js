@@ -114,7 +114,7 @@ StackExchange.citationhelper = (function(){
     if($('.popup-cite').length>0){return;} // Abort if dialog already exists
     
     // Tweaked version of SE close popup code. See popup.html for unminified HTML, genblob.sh can easily generate the below line from popup.html
-var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane close-as-duplicate-pane" data-title="Insert Citation" data-breadcrumb="Cite"><input id="search-text" type="text" style="width: 740px; z-index: 1; position: relative;"><div class="search-errors search-spinner"></div> <div class="original-display" style="width:712px"> <div id="previewbox" style="display:none"><div><a href="javascript:void(0)" id=backlink>&lt; Back to results</a></div><div class="preview" ></div></div> <div class="list-container"> <div class="list-originals" id="results"> </div> </div> </div></div><div class="popup-actions"><input type="submit" id="cite-submit" class="popup-submit disabled-button" value="Insert Citation" disabled="disabled" style="cursor: default;"></div></div>';
+    var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a title="close this popup (or hit Esc)" href="javascript:void(0)">&times;</a></div><h2 class="popup-title-container handle"> <span class="popup-breadcrumbs"></span><span class="popup-title">Insert citation</span></h2><div id="pane-main" class="popup-pane popup-active-pane close-as-duplicate-pane" data-title="Insert Citation" data-breadcrumb="Cite"><input id="search-text" type="text" style="width: 740px; z-index: 1; position: relative;"><div class="search-errors search-spinner"></div> <div class="original-display" style="width:712px"> <div id="previewbox" style="display:none"><div><a href="javascript:void(0)" id=backlink>&lt; Back to results</a></div><div class="preview" ></div></div> <div class="list-container"> <div class="list-originals" id="results"> </div> </div> </div></div><div class="popup-actions"><input type="submit" id="cite-submit" class="popup-submit disabled-button" value="Insert Citation" disabled="disabled" style="cursor: default;"></div></div>';
 
     /*
     // Data URIs give CORS issues, but blobs are fine
@@ -156,12 +156,14 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
       runSearch();
     }
   }
-
+  // Run a search
   function runSearch(){
     $('#popup-cite .search-spinner').removeSpinner().addSpinner();
     goBack();
     $.getJSON("http://polar-dawn-1849.herokuapp.com/?callback=?&q=" + $('#search-text').val(), fetchCallback);
-  } 
+  }
+  
+  // Callback to run when search completes
   function fetchCallback(response) {
   // response = { 
   //	 query: "jones index for subfactors",
@@ -201,20 +203,22 @@ var popupHTML = '<div id="popup-cite" class="popup"><div class="popup-close"><a 
 	  if(href) {
 		  return $('<a href="'+href+'">' + text + '</a>').click(loadInFrameCallback(href,result))
 	  } else {
-		  return "" //return '<span class="inactive">' + text + '</span> ';
+		  return "";
 	  }
   }
   function loadInFrameCallback(href,result){
     return function(e) {e.preventDefault();e.stopPropagation();loadInFrame(href,result);return false;}
   }
   function loadInFrame(href, result){
+    $('#popup-cite .search-spinner').addSpinner();
     $('#popup-cite .popup-submit').enable();
     currentResult=result;
     $('.list-container').hide()
     $('#popup-cite #previewbox').show()
-    $('#popup-cite .preview').html("<iframe style='width:100%;height:100%' src='"+href+"'></iframe>")
+    $('#popup-cite .preview').html("<iframe style='width:100%;height:100%' src='"+href+"' onload='$(\"#popup-cite .search-spinner\").removeSpinner();'></iframe>")
   }
   function goBack(){
+    $('#popup-cite .search-spinner').removeSpinner();
     $('.list-container').show()
     $('#popup-cite #previewbox').hide()    
     $('#popup-cite .popup-submit').disable();
