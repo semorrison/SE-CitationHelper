@@ -190,7 +190,7 @@ StackExchange.citationhelper = (function(){
 				  $('<div class="item" style="float:none;padding:5px">')
 					  .append($('<div class = "summary post-link" style="float:none;width:auto"></div>').append(result.title))
 					  .append('<br/>').append($('<span class="body-summary" style="float:none"></span>')
-						  .append(result.authors + '<br/>' + result.cite  + '<br/> Preview: ')
+						  .append(result.authors + '<br/>' + result.citation_html  + '<br/> Preview: ')
 						  .append(renderOptionalLink(mr, 'mathscinet',result)).append(" ")
 						  .append(renderOptionalLink(journal, 'journal',result)).append(" ")
 						  .append(renderOptionalLink(result.pdf, 'pdf',result)).append(" ")
@@ -235,9 +235,9 @@ StackExchange.citationhelper = (function(){
     var json = msg//JSON.parse(msg.data);
     var cite = $('<cite>').attr('authors', json.authors)
 			  .attr('MRNumber', json.MRNumber)
-			  .attr('cite', json.cite)
+			  .attr('cite', json.citation_markdown)
 			  .append('['+json.title+']('+encodeURI(json.url)+")")
-			  .append(", _"+json.authors+"_ , "+json.cite);
+			  .append(", _"+json.authors+"_ , "+json.citation_markdown);
 			  
     var citeHTML=$('<span></span>').append(cite).html();
     var val=document.getElementById(id).value;
