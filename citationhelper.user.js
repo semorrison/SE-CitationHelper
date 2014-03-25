@@ -236,8 +236,9 @@ StackExchange.citationhelper = (function(){
     var cite = $('<cite>').attr('authors', json.authors)
 			  .attr('MRNumber', json.MRNumber)
 			  .attr('cite', json.citation_markdown)
-			  .append('['+json.title+']('+encodeURI(json.url)+")")
-			  .append(", _"+json.authors+"_ , "+json.citation_markdown);
+        .append("_" + json.authors + "_, ")
+			  .append('[**'+json.title+'**]('+encodeURI(json.url)+"), ")
+			  .append(json.citation_markdown + ".");
 			  
     var citeHTML=$('<span></span>').append(cite).html();
     var val=document.getElementById(id).value;
