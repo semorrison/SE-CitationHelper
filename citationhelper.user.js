@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name Citation Helper
-// @version 2.3.0
+// @version 2.4.0
 // @author Manish Goregaokar (http://stackapps.com/users/10098/manishearth)
 // @description Adds a cite button to the toolbar that allows for easy insertions of citations
 // @license CC-BY-SA
