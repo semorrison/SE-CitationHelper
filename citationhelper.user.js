@@ -230,9 +230,8 @@ StackExchange.citationhelper = (function(){
     $('#popup-cite .popup-submit').disable();
   }
   // Build <cite> tags from the JSON and insert it in the right place on the page
-  function updateEditor(msg, id){
+  function updateEditor(json, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
-    var json = msg//JSON.parse(msg.data);
     var cite = $('<cite>').attr('authors', json.authors)
 			  .attr('MRNumber', json.MRNumber)
 			  .attr('cite', json.citation_markdown)
