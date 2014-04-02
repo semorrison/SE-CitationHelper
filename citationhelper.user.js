@@ -226,7 +226,7 @@ StackExchange.citationhelper = (function(){
   function goBack(){
     $('#popup-cite .search-spinner').removeSpinner();
     $('.list-container').show()
-    $('#popup-cite #previewbox').hide()    
+    $('#popup-cite #previewbox').hide()
     $('#popup-cite .popup-submit').disable();
   }
   // Build <cite> tags from the JSON and insert it in the right place on the page
