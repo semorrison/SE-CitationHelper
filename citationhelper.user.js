@@ -1,13 +1,15 @@
 // ==UserScript==
 // @name Citation Helper
-// @version 2.3.0
+// @version 2.4.1
 // @author Manish Goregaokar (http://stackapps.com/users/10098/manishearth)
+// @author Scott Morrison (https://tqft.net/)
 // @description Adds a cite button to the toolbar that allows for easy insertions of citations
 // @license CC-BY-SA
 // @include http://mathoverflow.net/*
 // @include http://physics.stackexchange.com/*
 // ==/UserScript==
 
+// Changes in 2.4.1 (22 Oct 2015): switch from using JSONP to CORS
 
 // Necessary for userscript to work, but not for plugin
 function with_jquery(f) {
@@ -166,7 +168,7 @@ StackExchange.citationhelper = (function(){
   function runSearch(){
     goBack();
     $('#popup-cite .search-spinner').removeSpinner().addSpinner();
-    $.getJSON("http://ec2.mathoverflow.org:8080/?callback=?&q=" + $('#search-text').val(), fetchCallback);
+    $.getJSON("http://ec2.mathoverflow.org:8080/?q=" + $('#search-text').val(), fetchCallback);
   }
   
   // Callback to run when search completes
