@@ -42,7 +42,7 @@ StackExchange.citationhelper = (function(){
     try{
       var tid=$(this).find(".wmd-input")[0].id;
       row=$(this).find(".wmd-button-row")[0];
-      lastel=$(row).find(".wmd-button").not(".wmd-help-button").filter(":last");
+      lastel=$(row).find("#wmd-image-button");
       if(lastel.length>0){
         px=parseInt(lastel[0].style.left.replace("px",""))+25;
         btn='<li class="wmd-button wmd-button-'+identify+'" style="left: '+px+'px; "><span class=citebuttonspan style="background-image:url('+pic+');text-align:center;">'+text+'</span></li>';
