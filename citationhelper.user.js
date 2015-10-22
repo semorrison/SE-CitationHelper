@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name Citation Helper
-// @version 2.3.0
+// @version 2.4.0
 // @author Manish Goregaokar (http://stackapps.com/users/10098/manishearth)
 // @description Adds a cite button to the toolbar that allows for easy insertions of citations
 // @license CC-BY-SA
@@ -226,13 +226,12 @@ StackExchange.citationhelper = (function(){
   function goBack(){
     $('#popup-cite .search-spinner').removeSpinner();
     $('.list-container').show()
-    $('#popup-cite #previewbox').hide()    
+    $('#popup-cite #previewbox').hide()
     $('#popup-cite .popup-submit').disable();
   }
   // Build <cite> tags from the JSON and insert it in the right place on the page
-  function updateEditor(msg, id){
+  function updateEditor(json, id){
     // More or less copied from https://github.com/semorrison/citation-search/blob/gh-pages/frame-test.html
-    var json = msg//JSON.parse(msg.data);
     var cite = $('<cite>').attr('authors', json.authors)
 			  .attr('MRNumber', json.MRNumber)
 			  .attr('cite', json.citation_markdown)
