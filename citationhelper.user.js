@@ -168,7 +168,7 @@ StackExchange.citationhelper = (function(){
   function runSearch(){
     goBack();
     $('#popup-cite .search-spinner').removeSpinner().addSpinner();
-    $.getJSON("https://ec2.mathoverflow.org/?q=" + $('#search-text').val(), fetchCallback);
+    $.getJSON("https://ec2.mathoverflow.org/cite?q=" + $('#search-text').val(), fetchCallback);
   }
   
   // Callback to run when search completes
